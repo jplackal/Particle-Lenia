@@ -121,3 +121,7 @@ while running:
     clock.tick(60)
 
 pygame.quit()
+
+
+#saved patterns
+#[[1, 1, 1], [-1, 1, 0], [0, 0, -1]]
