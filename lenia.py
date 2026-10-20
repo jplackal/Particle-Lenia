@@ -3,8 +3,8 @@ import random
 
 pygame.init()
 
-WIDTH = 1440
-HEIGHT = 900
+WIDTH = 1300
+HEIGHT = 750
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Particle Lenia")
