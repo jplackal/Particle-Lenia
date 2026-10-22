@@ -14,6 +14,7 @@ pos_and_vels = []
 force_matrix = []
 auto_create_matrix = 0
 types = 3
+paused = 0
 if auto_create_matrix == 0:
     for i in range(0,types):
         force_matrix.append([random.randint(-1, 1) for _ in range(types)])
@@ -103,7 +104,7 @@ def iterate():
         pos_and_vels[i][0] += pos_and_vels[i][2]
         pos_and_vels[i][1] += pos_and_vels[i][3]
         pos_and_vels[i][0] %= (WIDTH+1)
-        pos_and_vels[i][1] %= (HEIGHT+1)
+        pos_and_vels[i][1] %= (HEIGHT+1) 
 
 running = True
 
@@ -112,8 +113,15 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            if paused == 0:
+                paused = 1
+            else:
+                paused = 0
+
     screen.fill((0, 0, 0))
-    iterate()
+    if paused == 0:
+        iterate()
     for x, y, vx, vy, c, s in pos_and_vels:
         pygame.draw.circle(screen, matrix_colors[c], (x, y), s)
 
