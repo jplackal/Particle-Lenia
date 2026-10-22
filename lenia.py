@@ -10,6 +10,11 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Particle Lenia")
 
 clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 50)
+
+text = font.render(" ", True, (255, 255, 255))
+text.set_alpha(128)
+
 pos_and_vels = []
 force_matrix = []
 auto_create_matrix = 0
@@ -116,15 +121,16 @@ while running:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             if paused == 0:
                 paused = 1
+                text = font.render("Paused", True, (255, 255, 255))
             else:
                 paused = 0
-
+                text = font.render("", True, (255, 255, 255))
     screen.fill((0, 0, 0))
     if paused == 0:
         iterate()
     for x, y, vx, vy, c, s in pos_and_vels:
         pygame.draw.circle(screen, matrix_colors[c], (x, y), s)
-
+    screen.blit(text, (10, HEIGHT-35))
     pygame.display.flip()
     clock.tick(60)
 
