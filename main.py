@@ -138,7 +138,7 @@ def iterate():
 
 
 async def main():
-    global paused, text
+    global paused, text, force_matrix, matrix_colors, types
 
     running = True
 
@@ -159,6 +159,43 @@ async def main():
                         text = font.render(
                             "", True, (255, 255, 255)
                         )
+                if event.key == pygame.K_r:
+                    if auto_create_matrix == 0:
+                        force_matrix = [
+                            [random.randint(-1, 1) for _ in range(types)]
+                            for _ in range(types)
+                        ]
+                    else:
+                        force_matrix = [
+                            [1, 1, -1],
+                            [-1, 1, 1],
+                            [1, -1, -1]
+                        ]
+
+                    print(force_matrix)
+
+                    matrix_colors = []
+
+                    for i in range(len(force_matrix)):
+                        while True:
+                            color = (
+                                random.randint(0, 255),
+                                random.randint(0, 255),
+                                random.randint(0, 255)
+                            )
+
+                            if all(
+                                sum((color[j] - old[j]) ** 2 for j in range(3)) > 10000
+                                for old in matrix_colors
+                            ):
+                                matrix_colors.append(color)
+                                break
+
+                    pos_and_vels.clear()
+                    setup(250)
+
+
+
 
         screen.fill((0, 0, 0))
 
