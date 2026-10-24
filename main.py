@@ -15,12 +15,16 @@ font = pygame.font.SysFont(None, 50)
 text = font.render("", True, (255, 255, 255))
 text.set_alpha(128)
 
+textreset = font.render("reset", True, (255, 255, 255))
+textreset.set_alpha(128)
+
 pos_and_vels = []
 force_matrix = []
 
 auto_create_matrix = 0
 types = 3
 paused = 0
+stext = 0
 
 if auto_create_matrix == 0:
     for i in range(types):
@@ -138,7 +142,7 @@ def iterate():
 
 
 async def main():
-    global paused, text, force_matrix, matrix_colors, types
+    global paused, text, force_matrix, matrix_colors, types, stext
 
     running = True
 
@@ -160,6 +164,7 @@ async def main():
                             "", True, (255, 255, 255)
                         )
                 if event.key == pygame.K_r:
+                    stext+=1
                     if auto_create_matrix == 0:
                         force_matrix = [
                             [random.randint(-1, 1) for _ in range(types)]
@@ -194,9 +199,13 @@ async def main():
                     pos_and_vels.clear()
                     setup(250)
 
-
-
-
+        if stext != 0:
+            textreset = font.render("Reset", True, (255, 255, 255))
+            stext+=1
+        else:
+            textreset = font.render("", True, (255, 255, 255))
+        if stext >= 20:
+            stext = 0
         screen.fill((0, 0, 0))
 
         if paused == 0:
@@ -208,6 +217,7 @@ async def main():
             )
 
         screen.blit(text, (10, HEIGHT - 50))
+        screen.blit(textreset, (10, HEIGHT - 50))
 
         pygame.display.flip()
         clock.tick(60)
