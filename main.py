@@ -1,10 +1,8 @@
-
 import asyncio
 import pygame
 import random
-
 pygame.init()
-
+random.seed()
 WIDTH = 1300
 HEIGHT = 750
 
