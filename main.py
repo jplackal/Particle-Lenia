@@ -145,7 +145,7 @@ async def main():
     global paused, text, force_matrix, matrix_colors, types, stext
 
     running = True
-
+    pygame.key.start_text_input()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
