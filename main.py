@@ -420,7 +420,7 @@ async def main():
                 if editing:
                     pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
                 if border == 1:
-                    pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 2)
+                    pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 5)
                 pygame.display.flip()
                 await asyncio.sleep(0)
                 pygame.event.pump()
@@ -478,7 +478,7 @@ async def main():
         if editing == 1 and (pen == "drag" or pen == "delete"):
             pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
         if border == 1:
-            pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 2)
+            pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 5)
         screen.blit(text, (10, HEIGHT - 50))
         screen.blit(textreset, (10, HEIGHT - 50))
         screen.blit(edit, (WIDTH-150, HEIGHT - 50))
