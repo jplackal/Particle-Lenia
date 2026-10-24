@@ -5,6 +5,9 @@ first run the code then you will have a small screen showing the game itself.
 to go to the website version then go to jplackal.itch.io
 there you can also run the code
 
+also to see some cool life forms you can paste in the bottom matrixes for some additional fun to do this turn the variable auto_create_matrix to 1 at the start of the code.
+then go to the bottom and copy one of the save codes and paste it in!
+
 basic keybinds!
     these are the basic keybinds that are used 
     Space bar = pause
@@ -48,3 +51,4 @@ every frame the iterate function calculates the new position and velocities for 
 so thats how particle lenia works
 
 the rest of the project are just side features such as pausing editing and more
+

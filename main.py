@@ -56,7 +56,7 @@ def create_matrix():
             [random.randint(-1, 1) for _ in range(types)]
             for _ in range(types)
         ]
-
+    #paste the save code below in the square brackets
     return [
         [1, 1, -1],
         [-1, 1, 1],
@@ -448,6 +448,5 @@ asyncio.run(main())
 
 
 # Saved patterns:
-# [[1, 1, 1], [-1, 1, 0], [0, 0, -1]]
-#[[1, 1, -1], [0, -1, 1], [1, 1, -1]] really cool
-# also really cool [[0, 1, 0], [1, -1, 1], [-1, -1, 1]]
+#[1, 1, -1], [0, -1, 1], [1, 1, -1] a cool cross looking thing
+#[0, 1, 0], [1, -1, 1], [-1, -1, 1] some string like lifeforms
