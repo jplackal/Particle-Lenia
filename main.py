@@ -31,7 +31,8 @@ types = 3
 paused = 0
 stext = 0
 editing = 0
-
+dwidth = 20
+change = 10
 
 def create_matrix():
     if auto_create_matrix == 0:
@@ -164,7 +165,7 @@ setup(250)
 
 
 async def main():
-    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit
+    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change
 
     running = True
 
@@ -226,6 +227,12 @@ async def main():
                         text = font.render(
                             "", True, (255, 255, 255)
                         )
+                elif event.key == pygame.K_k and editing:
+                    dwidth -= change
+                    dwidth = ((dwidth-change)%100)+change
+                elif event.key == pygame.K_l and editing:
+                    dwidth += change
+                    dwidth = ((dwidth-change)%100)+change
 
 
 
@@ -240,7 +247,7 @@ async def main():
 
         if stext >= 20:
             stext = 0
-
+        mouse_x, mouse_y = pygame.mouse.get_pos()
         screen.fill((0, 0, 0))
 
         # Run continuously only when unpaused
@@ -255,6 +262,8 @@ async def main():
                 (int(x), int(y)),
                 s
             )
+        if editing == 1:
+            pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
 
         screen.blit(text, (10, HEIGHT - 50))
         screen.blit(textreset, (10, HEIGHT - 50))
