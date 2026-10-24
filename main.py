@@ -277,9 +277,25 @@ async def main():
                     dwidth = ((dwidth-change)%100)+change
                 elif event.key == pygame.K_t:
                     trail = 1-trail
-                elif event.key == pygame.K_0 and editing:
+                elif event.key == pygame.K_1 and editing:
                     pen = "drag"
                     stext2 = 1
+                elif event.key == pygame.K_2 and editing:
+                    pen = "type 1"
+                    stext2 = 1
+                elif event.key == pygame.K_3 and editing:
+                    pen = "type 2"
+                    stext2 = 1
+                elif event.key == pygame.K_4 and editing:
+                    pen = "type 3"
+                    stext2 = 1
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and editing and pen != "delete" and pen != "drag":
+                if pen == "type 1":
+                    pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,0,random.randint(4, 7)])
+                if pen == "type 2":
+                    pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,1,random.randint(4, 7)])
+                if pen == "type 3":
+                    pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,2,random.randint(4, 7)])
 
 
         # Show the reset message briefly
@@ -371,7 +387,7 @@ async def main():
                 (int(((x)+cam_x)), int(((y)+cam_y))),
                 s
             )
-        if editing == 1:
+        if editing == 1 and pen == "drag" or pen == "delete":
             pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
         pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 2)
         screen.blit(text, (10, HEIGHT - 50))
