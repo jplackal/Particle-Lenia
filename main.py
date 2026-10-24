@@ -301,6 +301,7 @@ async def main():
                     pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
 
                 pygame.display.flip()
+                await asyncio.sleep(0)
                 pygame.event.pump()
             fix_dist()
 
