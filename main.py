@@ -1,8 +1,11 @@
+
 import asyncio
 import pygame
 import random
+
 pygame.init()
 random.seed()
+
 WIDTH = 1300
 HEIGHT = 750
 
@@ -15,7 +18,7 @@ font = pygame.font.SysFont(None, 50)
 text = font.render("", True, (255, 255, 255))
 text.set_alpha(128)
 
-textreset = font.render("reset", True, (255, 255, 255))
+textreset = font.render("", True, (255, 255, 255))
 textreset.set_alpha(128)
 
 pos_and_vels = []
@@ -26,36 +29,52 @@ types = 3
 paused = 0
 stext = 0
 
-if auto_create_matrix == 0:
-    for i in range(types):
-        force_matrix.append(
+
+def create_matrix():
+    if auto_create_matrix == 0:
+        return [
             [random.randint(-1, 1) for _ in range(types)]
-        )
-else:
-    force_matrix = [
+            for _ in range(types)
+        ]
+
+    return [
         [1, 1, -1],
         [-1, 1, 1],
         [1, -1, -1]
     ]
 
+
+force_matrix = create_matrix()
 print(force_matrix)
 
 matrix_colors = []
 
-for i in range(len(force_matrix)):
-    while True:
-        color = (
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255)
-        )
 
-        if all(
-            sum((color[j] - old[j]) ** 2 for j in range(3)) > 10000
-            for old in matrix_colors
-        ):
-            matrix_colors.append(color)
-            break
+def create_colors():
+    colors = []
+
+    for i in range(len(force_matrix)):
+        while True:
+            color = (
+                random.randint(0, 255),
+                random.randint(0, 255),
+                random.randint(0, 255)
+            )
+
+            if all(
+                sum(
+                    (color[j] - old[j]) ** 2
+                    for j in range(3)
+                ) > 10000
+                for old in colors
+            ):
+                colors.append(color)
+                break
+
+    return colors
+
+
+matrix_colors = create_colors()
 
 min_range = 15
 sense_dist = 100
@@ -78,9 +97,6 @@ def setup(count):
         s = random.randint(4, 7)
 
         pos_and_vels.append([x, y, vx, vy, c, s])
-
-
-setup(250)
 
 
 def iterate():
@@ -141,17 +157,22 @@ def iterate():
         particle[1] = (particle[1] + particle[3]) % HEIGHT
 
 
+setup(250)
+
+
 async def main():
-    global paused, text, force_matrix, matrix_colors, types, stext
+    global paused, text, force_matrix, matrix_colors, stext, textreset
 
     running = True
-    pygame.key.start_text_input()
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
             if event.type == pygame.KEYDOWN:
+
+                # Space: pause or resume
                 if event.key == pygame.K_SPACE:
                     paused = 1 - paused
 
@@ -159,70 +180,56 @@ async def main():
                         text = font.render(
                             "Paused", True, (255, 255, 255)
                         )
-                        stext = 0
-
+                        text.set_alpha(128)
                     else:
                         text = font.render(
                             "", True, (255, 255, 255)
                         )
-                if event.key == pygame.K_r:
-                    stext+=1
-                    paused = 0
-                    text = font.render(
-                            "", True, (255, 255, 255)
-                        )
-                    if auto_create_matrix == 0:
-                        force_matrix = [
-                            [random.randint(-1, 1) for _ in range(types)]
-                            for _ in range(types)
-                        ]
-                    else:
-                        force_matrix = [
-                            [1, 1, -1],
-                            [-1, 1, 1],
-                            [1, -1, -1]
-                        ]
 
+                # R: reset the simulation
+                elif event.key == pygame.K_r:
+                    stext = 1
+                    paused = 0
+                    text = font.render("", True, (255, 255, 255))
+
+                    force_matrix = create_matrix()
                     print(force_matrix)
 
-                    matrix_colors = []
-
-                    for i in range(len(force_matrix)):
-                        while True:
-                            color = (
-                                random.randint(0, 255),
-                                random.randint(0, 255),
-                                random.randint(0, 255)
-                            )
-
-                            if all(
-                                sum((color[j] - old[j]) ** 2 for j in range(3)) > 10000
-                                for old in matrix_colors
-                            ):
-                                matrix_colors.append(color)
-                                break
+                    matrix_colors = create_colors()
 
                     pos_and_vels.clear()
                     setup(250)
-                if event.key == pygame.K_s:
-                    if paused:
-                        iterate()
 
+                # S: advance one step while paused
+                elif event.key == pygame.K_s and paused:
+                    iterate()
+
+        # Show the reset message briefly
         if stext != 0:
-            textreset = font.render("Reset", True, (255, 255, 255))
-            stext+=1
+            textreset = font.render(
+                "Reset", True, (255, 255, 255)
+            )
+            textreset.set_alpha(128)
+            stext += 1
         else:
             textreset = font.render("", True, (255, 255, 255))
+
         if stext >= 20:
             stext = 0
+
         screen.fill((0, 0, 0))
 
+        # Run continuously only when unpaused
         if paused == 0:
             iterate()
 
+        # Draw particles
         for x, y, vx, vy, c, s in pos_and_vels:
             pygame.draw.circle(
-                screen, matrix_colors[c], (int(x), int(y)), s
+                screen,
+                matrix_colors[c],
+                (int(x), int(y)),
+                s
             )
 
         screen.blit(text, (10, HEIGHT - 50))
@@ -240,4 +247,3 @@ asyncio.run(main())
 
 # Saved patterns:
 # [[1, 1, 1], [-1, 1, 0], [0, 0, -1]]
-
