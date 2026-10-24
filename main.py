@@ -35,6 +35,7 @@ stext = 0
 editing = 0
 dwidth = 20
 change = 10
+trail = 1
 
 def create_matrix():
     if auto_create_matrix == 0:
@@ -188,7 +189,7 @@ setup(250)
 
 
 async def main():
-    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag
+    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail
 
     running = True
 
@@ -261,6 +262,8 @@ async def main():
                 elif event.key == pygame.K_l and editing:
                     dwidth += change
                     dwidth = ((dwidth-change)%100)+change
+                elif event.key == pygame.K_t:
+                    trail = 1-trail
 
 
 
@@ -276,9 +279,12 @@ async def main():
         if stext >= 20:
             stext = 0
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        fade.fill((0, 0, 0, 45))
-        screen.blit(fade, (0, 0))
-
+        if trail == 1:
+            fade.fill((0, 0, 0, 45))
+            screen.blit(fade, (0, 0))
+        else:
+            fade.fill((0, 0, 0, 255))
+            screen.blit(fade, (0, 0))
 
         if pygame.mouse.get_pressed()[0] and editing:
             find_dist()
