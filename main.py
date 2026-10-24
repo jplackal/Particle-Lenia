@@ -16,10 +16,12 @@ clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 50)
 
 text = font.render("", True, (255, 255, 255))
-text.set_alpha(128)
+text.set_alpha(256)
 
 textreset = font.render("", True, (255, 255, 255))
-textreset.set_alpha(128)
+textreset.set_alpha(256)
+edit = font.render("", True, (255, 255, 255))
+edit.set_alpha(256)
 
 pos_and_vels = []
 force_matrix = []
@@ -28,6 +30,7 @@ auto_create_matrix = 0
 types = 3
 paused = 0
 stext = 0
+editing = 0
 
 
 def create_matrix():
@@ -161,7 +164,7 @@ setup(250)
 
 
 async def main():
-    global paused, text, force_matrix, matrix_colors, stext, textreset
+    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit
 
     running = True
 
@@ -173,14 +176,14 @@ async def main():
             if event.type == pygame.KEYDOWN:
 
                 # Space: pause or resume
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE and editing == 0:
                     paused = 1 - paused
+                    stext = 0
 
                     if paused:
                         text = font.render(
                             "Paused", True, (255, 255, 255)
                         )
-                        text.set_alpha(128)
                     else:
                         text = font.render(
                             "", True, (255, 255, 255)
@@ -189,7 +192,8 @@ async def main():
                 # R: reset the simulation
                 elif event.key == pygame.K_r:
                     stext = 1
-                    paused = 0
+                    if editing == 0:
+                        paused = 0
                     text = font.render("", True, (255, 255, 255))
 
                     force_matrix = create_matrix()
@@ -203,13 +207,33 @@ async def main():
                 # S: advance one step while paused
                 elif event.key == pygame.K_s and paused:
                     iterate()
+                elif event.key == pygame.K_e:
+                    paused = 1
+                    editing = 1-editing
+                    if editing == 0:
+                        edit = font.render(
+                "", True, (255, 255, 255)
+            )
+                    else:
+                        edit = font.render(
+                "Editing", True, (255, 255, 255)
+            )
+                    if paused:
+                        text = font.render(
+                            "Paused", True, (255, 255, 255)
+                        )
+                    else:
+                        text = font.render(
+                            "", True, (255, 255, 255)
+                        )
+
+
 
         # Show the reset message briefly
         if stext != 0:
             textreset = font.render(
                 "Reset", True, (255, 255, 255)
             )
-            textreset.set_alpha(128)
             stext += 1
         else:
             textreset = font.render("", True, (255, 255, 255))
@@ -234,6 +258,7 @@ async def main():
 
         screen.blit(text, (10, HEIGHT - 50))
         screen.blit(textreset, (10, HEIGHT - 50))
+        screen.blit(edit, (WIDTH-150, HEIGHT - 50))
 
         pygame.display.flip()
         clock.tick(60)
