@@ -86,6 +86,8 @@ speed = 0.15
 speed_cap = 3
 friction = 0.05
 
+def drag():
+    print("")
 
 def calc_force(og, ch):
     return force_matrix[og][ch]
@@ -250,9 +252,30 @@ async def main():
         mouse_x, mouse_y = pygame.mouse.get_pos()
         screen.fill((0, 0, 0))
 
+
+        if pygame.mouse.get_pressed()[0] and editing:
+            while pygame.mouse.get_pressed()[0]:
+                screen.fill((0, 0, 0))
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                for x, y, vx, vy, c, s in pos_and_vels:
+                    pygame.draw.circle(
+                        screen,
+                        matrix_colors[c],
+                        (int(x), int(y)),
+                        s
+                        )
+                if editing:
+                    pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
+                drag()
+                iterate()
+                pygame.display.flip()
+                pygame.event.pump()
+
+
         # Run continuously only when unpaused
         if paused == 0:
             iterate()
+
 
         # Draw particles
         for x, y, vx, vy, c, s in pos_and_vels:
