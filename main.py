@@ -14,6 +14,9 @@ maxwidth = 0
 maxheight = 0
 minwidth = -game_width+WIDTH
 minheight = -game_height+HEIGHT
+stext2 = 0
+cam_x = (WIDTH-game_width)/2
+cam_y = (HEIGHT-game_height)/2
 
 fade = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 
@@ -30,6 +33,8 @@ textreset = font.render("", True, (255, 255, 255))
 textreset.set_alpha(256)
 edit = font.render("", True, (255, 255, 255))
 edit.set_alpha(256)
+pentext = font.render("", True, (255, 255, 255))
+pentext.set_alpha(256)
 
 pos_and_vels = []
 force_matrix = []
@@ -42,9 +47,8 @@ editing = 0
 dwidth = 20
 change = 10
 trail = 1
-cam_x = 0
-cam_y = 0
 cam_speed = 10
+pen = "drag"
 
 def create_matrix():
     if auto_create_matrix == 0:
@@ -198,7 +202,7 @@ setup(250)
 
 
 async def main():
-    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail, cam_speed, cam_x, cam_y, maxheight, maxwidth, minheight, minwidth
+    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail, cam_speed, cam_x, cam_y, maxheight, maxwidth, minheight, minwidt, stext2, pen
 
     running = True
 
@@ -273,7 +277,9 @@ async def main():
                     dwidth = ((dwidth-change)%100)+change
                 elif event.key == pygame.K_t:
                     trail = 1-trail
-
+                elif event.key == pygame.K_0 and editing:
+                    pen = "drag"
+                    stext2 = 1
 
 
         # Show the reset message briefly
@@ -282,6 +288,7 @@ async def main():
                 "Reset", True, (255, 255, 255)
             )
             stext += 1
+
         else:
             textreset = font.render("", True, (255, 255, 255))
 
@@ -295,7 +302,7 @@ async def main():
             fade.fill((0, 0, 0, 255))
             screen.blit(fade, (0, 0))
 
-        if pygame.mouse.get_pressed()[0] and editing:
+        if pygame.mouse.get_pressed()[0] and editing and pen == "drag":
             find_dist()
             while pygame.mouse.get_pressed()[0]:
                 screen.fill((0, 0, 0))
@@ -317,7 +324,7 @@ async def main():
                             )
                 if editing:
                     pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
-                pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, WIDTH, HEIGHT), 2)
+                pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 2)
                 pygame.display.flip()
                 await asyncio.sleep(0)
                 pygame.event.pump()
@@ -370,7 +377,14 @@ async def main():
         screen.blit(text, (10, HEIGHT - 50))
         screen.blit(textreset, (10, HEIGHT - 50))
         screen.blit(edit, (WIDTH-150, HEIGHT - 50))
-
+        if stext2 != 0:
+            pentext = font.render(
+                f"Pen set to {pen}", True, (255, 255, 255)
+            )
+            stext2 += 1
+            screen.blit(pentext, (10, 10))
+        if stext2 > 30:
+            stext2 = 0
         pygame.display.flip()
         clock.tick(60)
 
