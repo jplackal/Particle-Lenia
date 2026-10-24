@@ -8,8 +8,8 @@ random.seed()
 
 WIDTH = 1300
 HEIGHT = 750
-game_width = int(1.5 * WIDTH)
-game_height = int(1.5 * HEIGHT)
+game_width = int(2 * WIDTH)
+game_height = int(2 * HEIGHT)
 maxwidth = 0
 maxheight = 0
 minwidth = -game_width+WIDTH
@@ -69,6 +69,13 @@ print(force_matrix)
 
 matrix_colors = []
 
+def delete():
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    global dwidth, cam_x, cam_y
+    for i , (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
+        dist = ((mouse_x-(x+cam_x))**2+(mouse_y-(y+cam_y))**2)**0.5
+        if dist < dwidth:
+            pos_and_vels.pop(i)
 
 def create_colors():
     colors = []
@@ -198,7 +205,7 @@ def iterate():
         particle[1] = (particle[1] + particle[3]) % game_height
 
 
-setup(250)
+setup(300)
 
 
 async def main():
@@ -245,7 +252,7 @@ async def main():
 
                     pos_and_vels.clear()
                     drag.clear()
-                    setup(250)
+                    setup(300)
 
                 # S: advance one step while paused
                 elif event.key == pygame.K_s and paused:
@@ -289,14 +296,16 @@ async def main():
                 elif event.key == pygame.K_4 and editing:
                     pen = "type 3"
                     stext2 = 1
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and editing and pen != "delete" and pen != "drag":
+                elif event.key == pygame.K_5 and editing:
+                    pen = "delete"
+                    stext2 = 1
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and editing:
                 if pen == "type 1":
                     pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,0,random.randint(4, 7)])
-                if pen == "type 2":
+                elif pen == "type 2":
                     pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,1,random.randint(4, 7)])
-                if pen == "type 3":
+                elif pen == "type 3":
                     pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,2,random.randint(4, 7)])
-
 
         # Show the reset message briefly
         if stext != 0:
@@ -323,6 +332,33 @@ async def main():
             while pygame.mouse.get_pressed()[0]:
                 screen.fill((0, 0, 0))
                 mouse_x, mouse_y = pygame.mouse.get_pos()
+                for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
+                    if drag[i] == False:
+                        pygame.draw.circle(
+                            screen,
+                            matrix_colors[c],
+                            (int((x+cam_x)), int((y+cam_y))),
+                            s
+                            )
+                    else:
+                        pygame.draw.circle(
+                            screen,
+                            matrix_colors[c],
+                            (int(x+(mouse_x-WIDTH/2)+cam_x), int(y+(mouse_y-HEIGHT/2)+cam_y)),
+                            s
+                            )
+                if editing:
+                    pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
+                pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 2)
+                pygame.display.flip()
+                await asyncio.sleep(0)
+                pygame.event.pump()
+            fix_dist()
+        if pygame.mouse.get_pressed()[0] and editing and pen == "delete":
+            while pygame.mouse.get_pressed()[0]:
+                screen.fill((0, 0, 0))
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                delete()
                 for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
                     if drag[i] == False:
                         pygame.draw.circle(
@@ -387,7 +423,7 @@ async def main():
                 (int(((x)+cam_x)), int(((y)+cam_y))),
                 s
             )
-        if editing == 1 and pen == "drag" or pen == "delete":
+        if editing == 1 and (pen == "drag" or pen == "delete"):
             pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
         pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 2)
         screen.blit(text, (10, HEIGHT - 50))
