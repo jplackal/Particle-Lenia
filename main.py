@@ -8,6 +8,12 @@ random.seed()
 
 WIDTH = 1300
 HEIGHT = 750
+game_width = int(1.5 * WIDTH)
+game_height = int(1.5 * HEIGHT)
+maxwidth = 0
+maxheight = 0
+minwidth = -game_width+WIDTH
+minheight = -game_height+HEIGHT
 
 fade = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 
@@ -36,6 +42,9 @@ editing = 0
 dwidth = 20
 change = 10
 trail = 1
+cam_x = 0
+cam_y = 0
+cam_speed = 10
 
 def create_matrix():
     if auto_create_matrix == 0:
@@ -83,17 +92,17 @@ def create_colors():
 
 matrix_colors = create_colors()
 
-min_range = 15
-sense_dist = 100
-speed = 0.15
-speed_cap = 3
+min_range = 30
+sense_dist = 200
+speed = 0.30
+speed_cap = 6
 friction = 0.05
 
 def find_dist():
     mouse_x, mouse_y = pygame.mouse.get_pos()
     global pos_and_vels, dwidth, drag
     for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
-        dist = ((mouse_x-x)**2+(mouse_y-y)**2)**0.5
+        dist = ((mouse_x-(x+cam_x))**2+(mouse_y-(y+cam_y))**2)**0.5
         if dist <= dwidth:
             pos_and_vels[i][0] = 0-(mouse_x - pos_and_vels[i][0]) + WIDTH/2
             pos_and_vels[i][1] = 0-(mouse_y - pos_and_vels[i][1]) + HEIGHT/2
@@ -115,8 +124,8 @@ def calc_force(og, ch):
 def setup(count):
     global pos_and_vels, drag
     for i in range(count):
-        x = random.randint(10, WIDTH - 10)
-        y = random.randint(10, HEIGHT - 10)
+        x = random.randint(10, game_width - 10)
+        y = random.randint(10, game_height - 10)
         vx = 0
         vy = 0
         c = random.randint(0, len(force_matrix) - 1)
@@ -137,15 +146,15 @@ def iterate():
             dy = pos_and_vels[o][1] - pos_and_vels[i][1]
 
             # Wrap distances around screen edges
-            if dx > WIDTH / 2:
-                dx -= WIDTH
-            elif dx < -WIDTH / 2:
-                dx += WIDTH
+            if dx > game_width / 2:
+                dx -= game_width
+            elif dx < -game_width / 2:
+                dx += game_width
 
-            if dy > HEIGHT / 2:
-                dy -= HEIGHT
-            elif dy < -HEIGHT / 2:
-                dy += HEIGHT
+            if dy > game_height / 2:
+                dy -= game_height
+            elif dy < -game_height / 2:
+                dy += game_height
 
             dist = (dx ** 2 + dy ** 2) ** 0.5
 
@@ -181,15 +190,15 @@ def iterate():
 
     # Move particles and wrap around screen edges
     for particle in pos_and_vels:
-        particle[0] = (particle[0] + particle[2]) % WIDTH
-        particle[1] = (particle[1] + particle[3]) % HEIGHT
+        particle[0] = (particle[0] + particle[2]) % game_width
+        particle[1] = (particle[1] + particle[3]) % game_height
 
 
 setup(250)
 
 
 async def main():
-    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail
+    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail, cam_speed, cam_x, cam_y, maxheight, maxwidth, minheight, minwidth
 
     running = True
 
@@ -296,25 +305,50 @@ async def main():
                         pygame.draw.circle(
                             screen,
                             matrix_colors[c],
-                            (int(x), int(y)),
+                            (int((x+cam_x)), int((y+cam_y))),
                             s
                             )
                     else:
                         pygame.draw.circle(
                             screen,
                             matrix_colors[c],
-                            (int(x+(mouse_x-WIDTH/2)), int(y+(mouse_y-HEIGHT/2))),
+                            (int(x+(mouse_x-WIDTH/2)+cam_x), int(y+(mouse_y-HEIGHT/2)+cam_y)),
                             s
                             )
                 if editing:
                     pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
-
+                pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, WIDTH, HEIGHT), 2)
                 pygame.display.flip()
                 await asyncio.sleep(0)
                 pygame.event.pump()
             fix_dist()
 
+        keys = pygame.key.get_pressed()
 
+        if keys[pygame.K_UP]:
+            cam_y+=cam_speed
+            fade.fill((0, 0, 0, 255))
+            screen.blit(fade, (0, 0))
+            if cam_y > maxheight:
+                cam_y = maxheight
+        if keys[pygame.K_DOWN]:
+            cam_y-=cam_speed
+            fade.fill((0, 0, 0, 255))
+            screen.blit(fade, (0, 0))
+            if cam_y < minheight:
+                cam_y = minheight
+        if keys[pygame.K_LEFT]:
+            cam_x+=cam_speed
+            fade.fill((0, 0, 0, 255))
+            screen.blit(fade, (0, 0))
+            if cam_x > maxwidth:
+                cam_x = maxwidth
+        if keys[pygame.K_RIGHT]:
+            cam_x-=cam_speed
+            fade.fill((0, 0, 0, 255))
+            screen.blit(fade, (0, 0))
+            if cam_x < minwidth:
+                cam_x = minwidth
         # Run continuously only when unpaused
         if paused == 0:
             iterate()
@@ -327,12 +361,12 @@ async def main():
             pygame.draw.circle(
                 screen,
                 matrix_colors[c],
-                (int(x), int(y)),
+                (int(((x)+cam_x)), int(((y)+cam_y))),
                 s
             )
         if editing == 1:
             pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
-
+        pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 2)
         screen.blit(text, (10, HEIGHT - 50))
         screen.blit(textreset, (10, HEIGHT - 50))
         screen.blit(edit, (WIDTH-150, HEIGHT - 50))
@@ -349,3 +383,5 @@ asyncio.run(main())
 
 # Saved patterns:
 # [[1, 1, 1], [-1, 1, 0], [0, 0, -1]]
+#[[1, 1, -1], [0, -1, 1], [1, 1, -1]] really cool
+# also really cool [[0, 1, 0], [1, -1, 1], [-1, -1, 1]]
