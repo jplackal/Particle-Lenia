@@ -25,7 +25,7 @@ edit.set_alpha(256)
 
 pos_and_vels = []
 force_matrix = []
-
+drag = []
 auto_create_matrix = 0
 types = 3
 paused = 0
@@ -86,14 +86,31 @@ speed = 0.15
 speed_cap = 3
 friction = 0.05
 
-def drag():
-    print("")
+def find_dist():
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    global pos_and_vels, dwidth, drag
+    for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
+        dist = ((mouse_x-x)**2+(mouse_y-y)**2)**0.5
+        if dist <= dwidth:
+            pos_and_vels[i][0] = 0-(mouse_x - pos_and_vels[i][0]) + WIDTH/2
+            pos_and_vels[i][1] = 0-(mouse_y - pos_and_vels[i][1]) + HEIGHT/2
+            drag[i] = True
+def fix_dist():
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    global pos_and_vels, dwidth, drag, WIDTH, HEIGHT
+    for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
+        if drag[i]==True:
+            pos_and_vels[i][0] = int(x+(mouse_x-WIDTH/2))
+            pos_and_vels[i][1] = int(y+(mouse_y-HEIGHT/2))
+            drag[i] = False
+    
 
 def calc_force(og, ch):
     return force_matrix[og][ch]
 
 
 def setup(count):
+    global pos_and_vels, drag
     for i in range(count):
         x = random.randint(10, WIDTH - 10)
         y = random.randint(10, HEIGHT - 10)
@@ -103,6 +120,8 @@ def setup(count):
         s = random.randint(4, 7)
 
         pos_and_vels.append([x, y, vx, vy, c, s])
+        drag.append(False)
+
 
 
 def iterate():
@@ -167,7 +186,7 @@ setup(250)
 
 
 async def main():
-    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change
+    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag
 
     running = True
 
@@ -195,6 +214,10 @@ async def main():
                 # R: reset the simulation
                 elif event.key == pygame.K_r:
                     stext = 1
+                    editing = 0
+                    edit = font.render(
+                "", True, (255, 255, 255)
+            )
                     if editing == 0:
                         paused = 0
                     text = font.render("", True, (255, 255, 255))
@@ -205,6 +228,7 @@ async def main():
                     matrix_colors = create_colors()
 
                     pos_and_vels.clear()
+                    drag.clear()
                     setup(250)
 
                 # S: advance one step while paused
@@ -254,22 +278,31 @@ async def main():
 
 
         if pygame.mouse.get_pressed()[0] and editing:
+            find_dist()
             while pygame.mouse.get_pressed()[0]:
                 screen.fill((0, 0, 0))
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                for x, y, vx, vy, c, s in pos_and_vels:
-                    pygame.draw.circle(
-                        screen,
-                        matrix_colors[c],
-                        (int(x), int(y)),
-                        s
-                        )
+                for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
+                    if drag[i] == False:
+                        pygame.draw.circle(
+                            screen,
+                            matrix_colors[c],
+                            (int(x), int(y)),
+                            s
+                            )
+                    else:
+                        pygame.draw.circle(
+                            screen,
+                            matrix_colors[c],
+                            (int(x+(mouse_x-WIDTH/2)), int(y+(mouse_y-HEIGHT/2))),
+                            s
+                            )
                 if editing:
                     pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
-                drag()
-                iterate()
+
                 pygame.display.flip()
                 pygame.event.pump()
+            fix_dist()
 
 
         # Run continuously only when unpaused
