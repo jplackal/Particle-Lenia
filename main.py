@@ -159,12 +159,18 @@ async def main():
                         text = font.render(
                             "Paused", True, (255, 255, 255)
                         )
+                        stext = 0
+
                     else:
                         text = font.render(
                             "", True, (255, 255, 255)
                         )
                 if event.key == pygame.K_r:
                     stext+=1
+                    paused = 0
+                    text = font.render(
+                            "", True, (255, 255, 255)
+                        )
                     if auto_create_matrix == 0:
                         force_matrix = [
                             [random.randint(-1, 1) for _ in range(types)]
@@ -198,6 +204,9 @@ async def main():
 
                     pos_and_vels.clear()
                     setup(250)
+                if event.key == pygame.K_s:
+                    if paused:
+                        iterate()
 
         if stext != 0:
             textreset = font.render("Reset", True, (255, 255, 255))
