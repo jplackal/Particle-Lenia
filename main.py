@@ -9,6 +9,8 @@ random.seed()
 WIDTH = 1300
 HEIGHT = 750
 
+fade = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Particle Lenia")
 
@@ -274,7 +276,8 @@ async def main():
         if stext >= 20:
             stext = 0
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        screen.fill((0, 0, 0))
+        fade.fill((0, 0, 0, 45))
+        screen.blit(fade, (0, 0))
 
 
         if pygame.mouse.get_pressed()[0] and editing:
@@ -310,7 +313,9 @@ async def main():
         if paused == 0:
             iterate()
 
-
+        if editing == 1:
+            fade.fill((0, 0, 0, 255))
+            screen.blit(fade, (0, 0))
         # Draw particles
         for x, y, vx, vy, c, s in pos_and_vels:
             pygame.draw.circle(
