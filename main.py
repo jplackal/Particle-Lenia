@@ -503,3 +503,4 @@ asyncio.run(main())
 # Saved patterns:
 #[1, 1, -1], [0, -1, 1], [1, 1, -1] a cool cross looking thing
 #[0, 1, 0], [1, -1, 1], [-1, -1, 1] some string like lifeforms
+#[0, 0, 1], [1, -1, 1], [0, 1, 0] circles

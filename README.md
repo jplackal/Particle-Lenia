@@ -17,6 +17,9 @@ basic keybinds!
     k = smaller select during Editing mode
     t = turn trail off and on
     s = while paused use this to step one iteration forward
+    b = removes border
+    u = makes all particles look the same size 
+        if you dont like the diffrent sizes
 
 
 editor keybinds!
