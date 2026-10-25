@@ -191,6 +191,35 @@ def iterate():
                     pos_and_vels[i][4],
                     pos_and_vels[o][4]
                 )
+        dx = pos_and_vels[mouse][0] - pos_and_vels[i][0]
+            dy = pos_and_vels[o][1] - pos_and_vels[i][1]
+
+            # Wrap distances around screen edges
+            if dx > game_width / 2:
+                dx -= game_width
+            elif dx < -game_width / 2:
+                dx += game_width
+
+            if dy > game_height / 2:
+                dy -= game_height
+            elif dy < -game_height / 2:
+                dy += game_height
+
+            dist = (dx ** 2 + dy ** 2) ** 0.5
+
+            # Avoid division by zero
+            if dist == 0:
+                continue
+            #min range is a variable that dictates wether if a particle is to close to another particle it repels no matter what
+            if dist <= min_range:
+                pos_and_vels[i][2] -= (dx / dist) * speed
+                pos_and_vels[i][3] -= (dy / dist) * speed
+            #checking wether the particles are in sensing distance
+            elif dist <= sense_dist:
+                force = calc_force(
+                    pos_and_vels[i][4],
+                    pos_and_vels[o][4]
+                )
 
                 pos_and_vels[i][2] += (dx / dist) * speed * force
                 pos_and_vels[i][3] += (dy / dist) * speed * force
