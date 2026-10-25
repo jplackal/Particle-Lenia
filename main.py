@@ -21,6 +21,9 @@ cam_y = (HEIGHT-game_height)/2
 border = 1
 uniform = 0
 uniform_colors = 0
+mouse_repel = 0
+mouse_force = 3
+stext3 = 0
 
 fade = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 
@@ -39,6 +42,8 @@ edit = font.render("", True, (255, 255, 255))
 edit.set_alpha(256)
 pentext = font.render("", True, (255, 255, 255))
 pentext.set_alpha(256)
+mrtext = font.render("", True, (255, 255, 255))
+mrtext.set_alpha(256)
 
 #this sets some more variables such as the setup lists
 pos_and_vels = []
@@ -157,6 +162,8 @@ def setup(count):
 # so thats why this code is so laggy in the code there is a nested repeat look whcih compares every particle to every other
 #thats 300 * 300 which is quite a lot
 def iterate():
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    global mouse_repel, dwidth, mouse_force, stext3
     for i in range(len(pos_and_vels)):
         for o in range(len(pos_and_vels)):
             if i == o:
@@ -190,39 +197,34 @@ def iterate():
                 force = calc_force(
                     pos_and_vels[i][4],
                     pos_and_vels[o][4]
+
                 )
-        dx = pos_and_vels[mouse][0] - pos_and_vels[i][0]
-            dy = pos_and_vels[o][1] - pos_and_vels[i][1]
-
-            # Wrap distances around screen edges
-            if dx > game_width / 2:
-                dx -= game_width
-            elif dx < -game_width / 2:
-                dx += game_width
-
-            if dy > game_height / 2:
-                dy -= game_height
-            elif dy < -game_height / 2:
-                dy += game_height
-
-            dist = (dx ** 2 + dy ** 2) ** 0.5
-
-            # Avoid division by zero
-            if dist == 0:
-                continue
-            #min range is a variable that dictates wether if a particle is to close to another particle it repels no matter what
-            if dist <= min_range:
-                pos_and_vels[i][2] -= (dx / dist) * speed
-                pos_and_vels[i][3] -= (dy / dist) * speed
-            #checking wether the particles are in sensing distance
-            elif dist <= sense_dist:
-                force = calc_force(
-                    pos_and_vels[i][4],
-                    pos_and_vels[o][4]
-                )
-
                 pos_and_vels[i][2] += (dx / dist) * speed * force
                 pos_and_vels[i][3] += (dy / dist) * speed * force
+        dx = mouse_x - (pos_and_vels[i][0]+cam_x)
+        dy = mouse_y - (pos_and_vels[i][1]+cam_y)
+
+            # Wrap distances around screen edges
+        if dx > game_width / 2:
+            dx -= game_width
+        elif dx < -game_width / 2:
+            dx += game_width
+
+        if dy > game_height / 2:
+            dy -= game_height
+        elif dy < -game_height / 2:
+            dy += game_height
+
+        dist = (dx ** 2 + dy ** 2) ** 0.5
+
+            # Avoid division by zero
+        if dist == 0:
+            continue
+            #min range is a variable that dictates wether if a particle is to close to another particle it repels no matter what
+
+        if dist <= dwidth and mouse_repel:
+            pos_and_vels[i][2] += (dx / dist) * speed * -mouse_force
+            pos_and_vels[i][3] += (dy / dist) * speed * -mouse_force
 
         # Apply friction
         pos_and_vels[i][2] *= (1 - friction)
@@ -247,7 +249,7 @@ setup(300)
 
 #this is the main loop
 async def main():
-    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail, cam_speed, cam_x, cam_y, maxheight, maxwidth, minheight, minwidt, stext2, pen, uniform, border, uniform_colors
+    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail, cam_speed, cam_x, cam_y, maxheight, maxwidth, minheight, minwidt, stext2, pen, uniform, border, uniform_colors, mouse_repel, stext3, mrtext
 
     running = True
 
@@ -318,11 +320,11 @@ async def main():
                             "", True, (255, 255, 255)
                         )
                 #this decreases the selection size
-                elif event.key == pygame.K_k and editing:
+                elif event.key == pygame.K_k:
                     dwidth -= change
                     dwidth = ((dwidth-change)%100)+change
                 #this code increases the selection size
-                elif event.key == pygame.K_l and editing:
+                elif event.key == pygame.K_l:
                     dwidth += change
                     dwidth = ((dwidth-change)%100)+change
                 #this code turns trial on and off
@@ -357,6 +359,12 @@ async def main():
                 #this code helps change whether the particles share a similar color
                 elif event.key == pygame.K_y:
                     uniform_colors = 1-uniform_colors
+                elif event.key == pygame.K_m and (not paused):
+                    mouse_repel = 1-mouse_repel
+                    stext3 = 1
+                    stext = 0
+                    stext2 = 0
+                    
             #this code edits and adds diffrent species of particles or types of particles
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and editing:
                 #this code helps dictate which type they add
@@ -382,6 +390,22 @@ async def main():
 
         if stext >= 20:
             stext = 0
+        if stext3 != 0:
+            if mouse_repel:
+                mrtext = font.render(
+                "Mouse Repel on", True, (255, 255, 255)
+                )
+            else:
+                mrtext = font.render(
+                "Mouse Repel off", True, (255, 255, 255)
+                )
+            stext3 += 1
+
+        else:
+            mrtext = font.render("", True, (255, 255, 255))
+
+        if stext3 >= 20:
+            stext3 = 0
         mouse_x, mouse_y = pygame.mouse.get_pos()
         #this dictates whether a trail appears or not
         if trail == 1:
@@ -440,7 +464,7 @@ async def main():
                                 (int(x+(mouse_x-WIDTH/2)+cam_x), int(y+(mouse_y-HEIGHT/2)+cam_y)),
                                 5.5
                                 )
-                if editing:
+                if editing :
                     pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
                 #this code draws all of the other features
                 pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 2)
@@ -565,13 +589,14 @@ async def main():
                     s
                 )
         #this shows the selection range only if your pen is "drag" or "delete"
-        if editing == 1 and (pen == "drag" or pen == "delete"):
+        if (editing == 1 and (pen == "drag" or pen == "delete")) or mouse_repel:
             pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
         #this shows if the border is showing
         if border == 1:
             pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 5)
         screen.blit(text, (10, HEIGHT - 50))
         screen.blit(textreset, (10, HEIGHT - 50))
+        screen.blit(mrtext, (10, HEIGHT - 50))
         screen.blit(edit, (WIDTH-150, HEIGHT - 50))
         if stext2 != 0:
             pentext = font.render(

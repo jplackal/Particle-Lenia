@@ -21,6 +21,7 @@ basic keybinds!
     u = makes all particles look the same size 
         if you dont like the diffrent sizes
     y = same thing as u but with particle color
+    m = mouse repell on and off
 
 
 editor keybinds!
