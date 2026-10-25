@@ -19,7 +19,7 @@ cam_x = (WIDTH-game_width)/2
 cam_y = (HEIGHT-game_height)/2
 border = 1
 uniform = 0
-uniform_colors = 1
+uniform_colors = 0
 
 fade = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 
