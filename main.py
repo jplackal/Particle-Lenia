@@ -59,11 +59,7 @@ def create_matrix():
             for _ in range(types)
         ]
     #paste the save code below in the square brackets
-    return [
-        [1, 1, -1],
-        [-1, 1, 1],
-        [1, -1, -1]
-    ]
+    return [[1, 1, -1], [0, -1, 1], [1, 1, -1]]
 
 
 force_matrix = create_matrix()
