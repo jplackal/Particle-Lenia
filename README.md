@@ -53,6 +53,9 @@ min dist tells if particles are to close they always repel. this helps avoid par
 the other variables are self explanatory
 every frame the iterate function calculates the new position and velocities for each particle and then after that displays them
 so thats how particle lenia works
+the other items like keybinds work in a loop for events.
+the drag function when the mouse is initially pressed down all particles set their position to the diffrence from the mouse if the particle is close enough to the mouse then while mouse is holding down the particles in rnage go to the dragged position. then after the mouse is lifted the particles change their positon by the difference in mouse position.
+
 
 the rest of the project are just side features such as pausing editing and more
 
