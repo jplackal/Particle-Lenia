@@ -19,6 +19,7 @@ cam_x = (WIDTH-game_width)/2
 cam_y = (HEIGHT-game_height)/2
 border = 1
 uniform = 0
+uniform_colors = 1
 
 fade = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 
@@ -212,7 +213,7 @@ setup(300)
 
 
 async def main():
-    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail, cam_speed, cam_x, cam_y, maxheight, maxwidth, minheight, minwidt, stext2, pen, uniform, border
+    global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail, cam_speed, cam_x, cam_y, maxheight, maxwidth, minheight, minwidt, stext2, pen, uniform, border, uniform_colors
 
     running = True
 
@@ -306,6 +307,8 @@ async def main():
                     uniform = 1-uniform
                 elif event.key == pygame.K_b:
                     border = 1-border
+                elif event.key == pygame.K_y:
+                    uniform_colors = 1-uniform_colors
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and editing:
                 if pen == "type 1":
                     pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,0,random.randint(4, 7)])
@@ -341,17 +344,21 @@ async def main():
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
                     if uniform == 0:
+                        if uniform_colors:
+                            color = (255,255,255)
+                        else:
+                            color = matrix_colors[c]
                         if drag[i] == False:
                             pygame.draw.circle(
                                 screen,
-                                matrix_colors[c],
+                                color,
                                 (int((x+cam_x)), int((y+cam_y))),
                                 s
                                 )
                         else:
                             pygame.draw.circle(
                                 screen,
-                                matrix_colors[c],
+                                color,
                                 (int(x+(mouse_x-WIDTH/2)+cam_x), int(y+(mouse_y-HEIGHT/2)+cam_y)),
                                 s
                                 )
@@ -359,14 +366,14 @@ async def main():
                         if drag[i] == False:
                             pygame.draw.circle(
                                 screen,
-                                matrix_colors[c],
+                                color,
                                 (int((x+cam_x)), int((y+cam_y))),
                                 5.5
                                 )
                         else:
                             pygame.draw.circle(
                                 screen,
-                                matrix_colors[c],
+                                color,
                                 (int(x+(mouse_x-WIDTH/2)+cam_x), int(y+(mouse_y-HEIGHT/2)+cam_y)),
                                 5.5
                                 )
@@ -384,17 +391,21 @@ async def main():
                 delete()
                 for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
                     if uniform == 0:
+                        if uniform_colors:
+                            color = (255,255,255)
+                        else:
+                            color = matrix_colors[c]
                         if drag[i] == False:
                             pygame.draw.circle(
                                 screen,
-                                matrix_colors[c],
+                                color,
                                 (int((x+cam_x)), int((y+cam_y))),
                                 s
                                 )
                         else:
                             pygame.draw.circle(
                                 screen,
-                                matrix_colors[c],
+                                color,
                                 (int(x+(mouse_x-WIDTH/2)+cam_x), int(y+(mouse_y-HEIGHT/2)+cam_y)),
                                 s
                                 )
@@ -402,14 +413,14 @@ async def main():
                         if drag[i] == False:
                             pygame.draw.circle(
                                 screen,
-                                matrix_colors[c],
+                                color,
                                 (int((x+cam_x)), int((y+cam_y))),
                                 5.5
                                 )
                         else:
                             pygame.draw.circle(
                                 screen,
-                                matrix_colors[c],
+                                color,
                                 (int(x+(mouse_x-WIDTH/2)+cam_x), int(y+(mouse_y-HEIGHT/2)+cam_y)),
                                 5.5
                                 )
@@ -420,7 +431,6 @@ async def main():
                 pygame.display.flip()
                 await asyncio.sleep(0)
                 pygame.event.pump()
-            fix_dist()
 
         keys = pygame.key.get_pressed()
 
@@ -457,17 +467,21 @@ async def main():
             screen.blit(fade, (0, 0))
         # Draw particles
         for x, y, vx, vy, c, s in pos_and_vels:
+            if uniform_colors:
+                color = (255,255,255)
+            else:
+                color = matrix_colors[c]
             if uniform == 1:
                 pygame.draw.circle(
                     screen,
-                    matrix_colors[c],
+                    color,
                     (int(((x)+cam_x)), int(((y)+cam_y))),
                     5.5
                 )
             else:
                 pygame.draw.circle(
                     screen,
-                    matrix_colors[c],
+                    color,
                     (int(((x)+cam_x)), int(((y)+cam_y))),
                     s
                 )
