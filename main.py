@@ -1,13 +1,14 @@
-
+#initializes the imports
 import asyncio
 import pygame
 import random
 
 pygame.init()
 random.seed()
-
+#sets the window width and height
 WIDTH = 1300
 HEIGHT = 750
+#sets some simple variables like map sizes and camera location
 game_width = int(2 * WIDTH)
 game_height = int(2 * HEIGHT)
 maxwidth = 0
@@ -39,6 +40,7 @@ edit.set_alpha(256)
 pentext = font.render("", True, (255, 255, 255))
 pentext.set_alpha(256)
 
+#this sets some more variables such as the setup lists
 pos_and_vels = []
 force_matrix = []
 drag = []
@@ -52,7 +54,7 @@ change = 10
 trail = 1
 cam_speed = 10
 pen = "drag"
-
+#this function creates the force matrix which dictates how all the particles interact with eachother
 def create_matrix():
     if auto_create_matrix == 0:
         return [
@@ -61,13 +63,13 @@ def create_matrix():
         ]
     #paste the save code below in the square brackets
     return [[1, 1, -1], [0, -1, 1], [1, 1, -1]]
-
-
+#sets up the matrix
 force_matrix = create_matrix()
+#prints the matrix so you can save it for later
 print(force_matrix)
 
 matrix_colors = []
-
+#this function deletes all the particles in range of the dwidth
 def delete():
     mouse_x, mouse_y = pygame.mouse.get_pos()
 
@@ -80,7 +82,7 @@ def delete():
         if dist < dwidth:
             pos_and_vels.pop(i)
             drag.pop(i)
-
+#this function creates the color matrix it sets the count of colors to the lenght of force matrix so it can match up nicely
 def create_colors():
     colors = []
 
@@ -91,7 +93,7 @@ def create_colors():
                 random.randint(0, 255),
                 random.randint(0, 255)
             )
-
+            #this code makes sure that all the colors are diffrent from eachother
             if all(
                 sum(
                     (color[j] - old[j]) ** 2
@@ -106,13 +108,13 @@ def create_colors():
 
 
 matrix_colors = create_colors()
-
+#this sets up some game variables like the speed and speed cap and more
 min_range = 30
 sense_dist = 200
 speed = 0.30
 speed_cap = 6
 friction = 0.05
-
+#this function finds distance in the drag function useing the mouse x and y so you can check the ones being dragged
 def find_dist():
     mouse_x, mouse_y = pygame.mouse.get_pos()
     global pos_and_vels, dwidth, drag
@@ -122,6 +124,7 @@ def find_dist():
             pos_and_vels[i][0] = 0-(mouse_x - pos_and_vels[i][0]) + WIDTH/2
             pos_and_vels[i][1] = 0-(mouse_y - pos_and_vels[i][1]) + HEIGHT/2
             drag[i] = True
+#this function at the end of the drag function sets the positions of the particles after drag
 def fix_dist():
     mouse_x, mouse_y = pygame.mouse.get_pos()
     global pos_and_vels, dwidth, drag, WIDTH, HEIGHT
@@ -131,11 +134,11 @@ def fix_dist():
             pos_and_vels[i][1] = int(y+(mouse_y-HEIGHT/2))
             drag[i] = False
     
-
+#this code should be longer but instead was one line 
 def calc_force(og, ch):
     return force_matrix[og][ch]
 
-
+#this setup makes all of the positons and velocities species/types and drag
 def setup(count):
     global pos_and_vels, drag
     for i in range(count):
@@ -150,7 +153,9 @@ def setup(count):
         drag.append(False)
 
 
-
+#this is the main code this code runs the checks for every one of particles and checks to force ofr each particle to each other particle that are in range
+# so thats why this code is so laggy in the code there is a nested repeat look whcih compares every particle to every other
+#thats 300 * 300 which is quite a lot
 def iterate():
     for i in range(len(pos_and_vels)):
         for o in range(len(pos_and_vels)):
@@ -176,11 +181,11 @@ def iterate():
             # Avoid division by zero
             if dist == 0:
                 continue
-
+            #min range is a variable that dictates wether if a particle is to close to another particle it repels no matter what
             if dist <= min_range:
                 pos_and_vels[i][2] -= (dx / dist) * speed
                 pos_and_vels[i][3] -= (dy / dist) * speed
-
+            #checking wether the particles are in sensing distance
             elif dist <= sense_dist:
                 force = calc_force(
                     pos_and_vels[i][4],
@@ -198,7 +203,7 @@ def iterate():
         vx = pos_and_vels[i][2]
         vy = pos_and_vels[i][3]
         curr_speed = (vx ** 2 + vy ** 2) ** 0.5
-
+        #THIS code applies the speed cap
         if curr_speed > speed_cap:
             pos_and_vels[i][2] *= speed_cap / curr_speed
             pos_and_vels[i][3] *= speed_cap / curr_speed
@@ -208,21 +213,24 @@ def iterate():
         particle[0] = (particle[0] + particle[2]) % game_width
         particle[1] = (particle[1] + particle[3]) % game_height
 
-
+#this is the main setup
 setup(300)
 
-
+#this is the main loop
 async def main():
     global paused, text, force_matrix, matrix_colors, stext, textreset, editing, edit, dwidth, change, drag, trail, cam_speed, cam_x, cam_y, maxheight, maxwidth, minheight, minwidt, stext2, pen, uniform, border, uniform_colors
 
     running = True
 
     while running:
+
+        #all this huge amount of code below its all of the keybinds for the editor camera and QOL improvements
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
             if event.type == pygame.KEYDOWN:
+                #these are all the keybinds which help all the features to run
 
                 # Space: pause or resume
                 if event.key == pygame.K_SPACE and editing == 0:
@@ -280,41 +288,57 @@ async def main():
                         text = font.render(
                             "", True, (255, 255, 255)
                         )
+                #this decreases the selection size
                 elif event.key == pygame.K_k and editing:
                     dwidth -= change
                     dwidth = ((dwidth-change)%100)+change
+                #this code increases the selection size
                 elif event.key == pygame.K_l and editing:
                     dwidth += change
                     dwidth = ((dwidth-change)%100)+change
+                #this code turns trial on and off
                 elif event.key == pygame.K_t:
                     trail = 1-trail
+                #this code helps the editor choose the drag setting
                 elif event.key == pygame.K_1 and editing:
                     pen = "drag"
                     stext2 = 1
+                #this code helps the editor choose the type 1 setting or species 1 for the particle
                 elif event.key == pygame.K_2 and editing:
                     pen = "type 1"
                     stext2 = 1
+                #this code helps the editor choose the type 2 setting or species 2 for the particles
                 elif event.key == pygame.K_3 and editing:
                     pen = "type 2"
                     stext2 = 1
+                #this code helps the editor choose the type 3 setting or species 3 for the particles
                 elif event.key == pygame.K_4 and editing:
                     pen = "type 3"
                     stext2 = 1
+                #this code selects the delete button and works with the selection sizes
                 elif event.key == pygame.K_5 and editing:
                     pen = "delete"
                     stext2 = 1
+                #this code helps change the sizes of the particles to all be set to 5.5 or they have their own sizes
                 elif event.key == pygame.K_u:
                     uniform = 1-uniform
+                #this code helps change whether the border shows or whether it hides
                 elif event.key == pygame.K_b:
                     border = 1-border
+                #this code helps change whether the particles share a similar color
                 elif event.key == pygame.K_y:
                     uniform_colors = 1-uniform_colors
+            #this code edits and adds diffrent species of particles or types of particles
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and editing:
+                #this code helps dictate which type they add
                 if pen == "type 1":
+                    #this one adds type 1 or species 1
                     pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,0,random.randint(4, 7)])
                 elif pen == "type 2":
+                    #this one adds type 2 or species 2
                     pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,1,random.randint(4, 7)])
                 elif pen == "type 3":
+                    #this one adds type 3 or species 3
                     pos_and_vels.append([mouse_x-cam_x,mouse_y-cam_y,0,0,2,random.randint(4, 7)])
 
         # Show the reset message briefly
@@ -330,12 +354,15 @@ async def main():
         if stext >= 20:
             stext = 0
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        #this dictates whether a trail appears or not
         if trail == 1:
             fade.fill((0, 0, 0, 45))
             screen.blit(fade, (0, 0))
         else:
             fade.fill((0, 0, 0, 255))
             screen.blit(fade, (0, 0))
+
+        #this code below writes the draggin code 
 
         if pygame.mouse.get_pressed()[0] and editing and pen == "drag":
             find_dist()
@@ -344,11 +371,14 @@ async def main():
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
                     if uniform == 0:
+                        #this code helps set the color
                         if uniform_colors:
-                            color = (255,255,255)
+                            color = (155,155,155)
                         else:
                             color = matrix_colors[c]
+                        #this code uses the type or species color
                         if drag[i] == False:
+                            #this code draws the circle while drag is not running
                             pygame.draw.circle(
                                 screen,
                                 color,
@@ -356,6 +386,7 @@ async def main():
                                 s
                                 )
                         else:
+                            #this code draws the circle with the offset of the mouse x and y  and draws it
                             pygame.draw.circle(
                                 screen,
                                 color,
@@ -363,6 +394,8 @@ async def main():
                                 s
                                 )
                     else:
+                        #this code draws the circles with a fixed size
+                        #this code draws it when you are not dragging
                         if drag[i] == False:
                             pygame.draw.circle(
                                 screen,
@@ -370,6 +403,7 @@ async def main():
                                 (int((x+cam_x)), int((y+cam_y))),
                                 5.5
                                 )
+                        #this code draws the circle with the offset of mouse x and mouse y
                         else:
                             pygame.draw.circle(
                                 screen,
@@ -379,22 +413,31 @@ async def main():
                                 )
                 if editing:
                     pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
+                #this code draws all of the other features
                 pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 2)
                 pygame.display.flip()
                 await asyncio.sleep(0)
                 pygame.event.pump()
             fix_dist()
+
+        #this code writes the delete particles code
+        
         if pygame.mouse.get_pressed()[0] and editing and pen == "delete":
             while pygame.mouse.get_pressed()[0]:
+                #this code is the loop that happens to delete the particles in range
                 screen.fill((0, 0, 0))
                 mouse_x, mouse_y = pygame.mouse.get_pos()
+                #this is the function that serves to delete the particles 
                 delete()
                 for i, (x, y, vx, vy, c, s) in enumerate(pos_and_vels):
+                    #this code fixes the color
+                    if uniform_colors:
+                        color = (155,155,155)
+                    else:
+                        color = matrix_colors[c]
                     if uniform == 0:
-                        if uniform_colors:
-                            color = (255,255,255)
-                        else:
-                            color = matrix_colors[c]
+                    #this code has random size not fixed
+                    #this code does not work while dragging
                         if drag[i] == False:
                             pygame.draw.circle(
                                 screen,
@@ -402,6 +445,7 @@ async def main():
                                 (int((x+cam_x)), int((y+cam_y))),
                                 s
                                 )
+                    #this code helps with the dragging
                         else:
                             pygame.draw.circle(
                                 screen,
@@ -410,6 +454,8 @@ async def main():
                                 s
                                 )
                     else:
+                    #this code has fixed sizes so the particles appear uniform 
+                    #this one does not conform to the dragging
                         if drag[i] == False:
                             pygame.draw.circle(
                                 screen,
@@ -417,6 +463,7 @@ async def main():
                                 (int((x+cam_x)), int((y+cam_y))),
                                 5.5
                                 )
+                    #this one does work with the dragging so while dragging it shows correctly
                         else:
                             pygame.draw.circle(
                                 screen,
@@ -424,6 +471,7 @@ async def main():
                                 (int(x+(mouse_x-WIDTH/2)+cam_x), int(y+(mouse_y-HEIGHT/2)+cam_y)),
                                 5.5
                                 )
+                
                 if editing:
                     pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
                 if border == 1:
@@ -434,6 +482,8 @@ async def main():
 
         keys = pygame.key.get_pressed()
 
+        #this code below changes the view of the camera
+        #if any key is pressedit changes cam x and y and also limits it so you cant go past the game view
         if keys[pygame.K_UP]:
             cam_y+=cam_speed
             fade.fill((0, 0, 0, 255))
@@ -468,7 +518,7 @@ async def main():
         # Draw particles
         for x, y, vx, vy, c, s in pos_and_vels:
             if uniform_colors:
-                color = (255,255,255)
+                color = (155,155,155)
             else:
                 color = matrix_colors[c]
             if uniform == 1:
@@ -485,8 +535,10 @@ async def main():
                     (int(((x)+cam_x)), int(((y)+cam_y))),
                     s
                 )
+        #this shows the selection range only if your pen is "drag" or "delete"
         if editing == 1 and (pen == "drag" or pen == "delete"):
             pygame.draw.circle(screen, (255, 255, 255), (mouse_x,mouse_y), dwidth, 2)
+        #this shows if the border is showing
         if border == 1:
             pygame.draw.rect(screen, (255, 255, 255), (0+cam_x, 0+cam_y, game_width, game_height), 5)
         screen.blit(text, (10, HEIGHT - 50))
@@ -506,10 +558,8 @@ async def main():
         # Allows asyncio-based environments to continue running
         await asyncio.sleep(0)
 
-
 asyncio.run(main())
-
-
+#the end
 # Saved patterns:
 #[1, 1, -1], [0, -1, 1], [1, 1, -1] a cool cross looking thing
 #[0, 1, 0], [1, -1, 1], [-1, -1, 1] some string like lifeforms
